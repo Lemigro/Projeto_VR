@@ -12,32 +12,46 @@ window.addEventListener('DOMContentLoaded', () => {
 async function init() {
     const container = document.querySelector('#inventory-container');
     const btnCreate = document.querySelector('#btn-create');
-    const btnUpdateMode = document.querySelector('#btn-update-mode');
+    
+    const btnColorMode = document.querySelector('#btn-color-mode');
+    const btnShapeMode = document.querySelector('#btn-shape-mode');
     const btnDeleteMode = document.querySelector('#btn-delete-mode');
-    const txtUpdate = document.querySelector('#txt-update');
+    
+    const txtColor = document.querySelector('#txt-color');
+    const txtShape = document.querySelector('#txt-shape');
     const txtDelete = document.querySelector('#txt-delete');
 
     let deleteModeActive = false;
-    let updateModeActive = false;
+    let colorModeActive = false;
+    let shapeModeActive = false;
 
     // --- GERENCIAMENTO DE INTERFACE ---
     function atualizarVisualBotoes() {
-        btnUpdateMode.setAttribute('material', 'color', updateModeActive ? '#FFA500' : '#8B4513');
-        txtUpdate.setAttribute('value', updateModeActive ? 'INSPECIONAR: ON' : 'INSPECIONAR: OFF');
+        btnColorMode.setAttribute('material', 'color', colorModeActive ? '#FFA500' : '#8B4513');
+        txtColor.setAttribute('value', colorModeActive ? 'MUDAR COR: ON' : 'MUDAR COR: OFF');
+        
+        btnShapeMode.setAttribute('material', 'color', shapeModeActive ? '#42A5F5' : '#1565C0');
+        txtShape.setAttribute('value', shapeModeActive ? 'MUDAR FORMA: ON' : 'MUDAR FORMA: OFF');
         
         btnDeleteMode.setAttribute('material', 'color', deleteModeActive ? '#FF0000' : '#8B0000');
         txtDelete.setAttribute('value', deleteModeActive ? 'REMOVER: ON' : 'REMOVER: OFF');
     }
 
-    btnUpdateMode.addEventListener('click', () => {
-        updateModeActive = !updateModeActive;
-        if (updateModeActive) deleteModeActive = false;
+    btnColorMode.addEventListener('click', () => {
+        colorModeActive = !colorModeActive;
+        if (colorModeActive) { deleteModeActive = false; shapeModeActive = false; }
+        atualizarVisualBotoes();
+    });
+
+    btnShapeMode.addEventListener('click', () => {
+        shapeModeActive = !shapeModeActive;
+        if (shapeModeActive) { deleteModeActive = false; colorModeActive = false; }
         atualizarVisualBotoes();
     });
 
     btnDeleteMode.addEventListener('click', () => {
         deleteModeActive = !deleteModeActive;
-        if (deleteModeActive) updateModeActive = false;
+        if (deleteModeActive) { colorModeActive = false; shapeModeActive = false; }
         atualizarVisualBotoes();
     });
 
@@ -54,7 +68,6 @@ async function init() {
         newItem.setAttribute('shadow', 'cast: true');
 
         const label = document.createElement('a-text');
-
         const refId = String(data.id).slice(-5);
         label.setAttribute('value', `REF: ${refId}`);
         label.setAttribute('align', 'center');
@@ -77,18 +90,37 @@ async function init() {
                 console.log("Removendo item:", data.id);
                 await DB.remover(data.id);
                 newItem.parentNode.removeChild(newItem);
-            } else if (updateModeActive) {
+                
+            } else if (colorModeActive) {
                 const novaCor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
                 console.log("Atualizando cor do item:", data.id);
                 newItem.setAttribute('color', novaCor);
+                data.color = novaCor;
                 await DB.atualizarCor(data.id, novaCor);
+                
+            } else if (shapeModeActive) {
+                const formas = ['a-box', 'a-sphere', 'a-cylinder', 'a-cone'];
+                let indexAtual = formas.indexOf(data.shape);
+                
+                const novaForma = formas[(indexAtual + 1) % formas.length];
+                console.log("Atualizando forma do item:", data.id, "para", novaForma);
+                
+                data.shape = novaForma;
+                
+
+                if(DB.atualizarForma) {
+                    await DB.atualizarForma(data.id, novaForma);
+                }
+                
+                newItem.parentNode.removeChild(newItem);
+                renderizarItem(data);
             }
         });
 
         container.appendChild(newItem);
     };
 
-    // --- LÓGICA DE CRIAÇÃO DE BOXES---
+    // --- LÓGICA DE CRIAÇÃO DE ITENS ---
     btnCreate.addEventListener('click', async () => {
         const totalNaTela = container.children.length;
 
@@ -108,7 +140,6 @@ async function init() {
         };
 
         renderizarItem(novoItem);
-        
         await DB.adicionar(novoItem);
     });
 

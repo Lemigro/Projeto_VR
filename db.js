@@ -35,6 +35,18 @@ export const DB = {
         }
     },
 
+    atualizarForma: async (id, novaForma) => {
+        try {
+            await fetch(`${API_URL}/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shape: novaForma })
+            });
+        } catch (error) {
+            console.error("Erro ao atualizar forma:", error);
+        }
+    },
+
     remover: async (id) => {
         try {
             await fetch(`${API_URL}/${id}`, {
