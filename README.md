@@ -46,6 +46,6 @@ O sistema respeita rigorosamente os verbos HTTP para cada operação:
 * **Feedback Visual**: Efeitos de escalonamento (hover) ao interagir com os objetos para melhorar a experiência do usuário (UX).
 * **Persistência de Forma**: O tipo de objeto (caixa, esfera, cone ou cilindro) é salvo no banco, garantindo que a cena permaneça idêntica após o recarregamento.
 
-Desenvolvedor:Pedro Nascimento
+Desenvolvedor: Pedro Nascimento
 
 Disciplina: Realidade Virtual
